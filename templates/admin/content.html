@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Content - {{ resource.title }}{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<a href="{{ url_for('admin_manage_resources', subject_id=resource.subject.id) }}" class="inline-flex items-center text-white/90 hover:text-white mb-4 transition group">
+    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+    Back to Resources
+</a>
+
+<!-- Resource Header -->
+<div class="bg-white rounded-2xl shadow-xl p-5 sm:p-6 mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ resource.title }}</h1>
+    <p class="text-gray-600 text-sm"><i class="fas fa-book-open text-indigo-500 mr-1"></i> Subject: {{ resource.subject.name }}</p>
+</div>
+
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Videos Column -->
+    <div class="bg-white rounded-2xl shadow-xl p-5 sm:p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-video text-red-500 mr-2"></i> Videos
+        </h2>
+
+        <!-- Add Video Form -->
+        <form method="POST" action="{{ url_for('add_video') }}" class="mb-6 pb-6 border-b border-gray-200">
+            <input type="hidden" name="resource_id" value="{{ resource.id }}">
+            <div class="mb-3">
+                <label class="block text-gray-700 font-medium mb-1 text-sm">Video Title</label>
+                <input type="text" name="title" class="w-full px-4 py-2 rounded-lg border border-gray-300" placeholder="e.g., Lecture 1" required>
+            </div>
+            <div class="mb-3">
+                <label class="block text-gray-700 font-medium mb-1 text-sm">YouTube URL or Embed Code</label>
+                <textarea name="url" rows="2" class="w-full px-4 py-2 rounded-lg border border-gray-300" placeholder="Paste YouTube URL or iframe embed" required></textarea>
+                <p class="text-xs text-gray-500 mt-1">Supports youtube.com/watch?v=..., youtu.be/..., or &lt;iframe&gt; tags</p>
+            </div>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
+                <i class="fas fa-plus-circle mr-2"></i> Add Video
+            </button>
+        </form>
+
+        <!-- Video List -->
+        {% if resource.videos %}
+            <ul class="space-y-3">
+                {% for video in resource.videos %}
+                <li class="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                    <div class="mb-2">
+                        <span class="font-medium text-gray-800">{{ video.title }}</span>
+                        <p class="text-xs text-gray-500 break-all mt-1">{{ video.url }}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openEditVideoModal({{ video.id }}, '{{ video.title }}', '{{ video.url }}')"
+                                class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                            <i class="fas fa-pen mr-1"></i> Edit
+                        </button>
+                        <a href="{{ url_for('delete_video', id=video.id) }}" 
+                           onclick="return confirm('Delete this video?')"
+                           class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                            <i class="fas fa-trash mr-1"></i> Delete
+                        </a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-center text-gray-500 py-4"><i class="fas fa-video-slash mr-2"></i>No videos yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- PDFs Column -->
+    <div class="bg-white rounded-2xl shadow-xl p-5 sm:p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-file-pdf text-blue-500 mr-2"></i> PDFs
+        </h2>
+
+        <!-- Add PDF Form -->
+        <form method="POST" action="{{ url_for('add_pdf') }}" class="mb-6 pb-6 border-b border-gray-200">
+            <input type="hidden" name="resource_id" value="{{ resource.id }}">
+            <div class="mb-3">
+                <label class="block text-gray-700 font-medium mb-1 text-sm">PDF Title</label>
+                <input type="text" name="title" class="w-full px-4 py-2 rounded-lg border border-gray-300" placeholder="e.g., Notes Chapter 1" required>
+            </div>
+            <div class="mb-3">
+                <label class="block text-gray-700 font-medium mb-1 text-sm">PDF URL</label>
+                <input type="url" name="url" class="w-full px-4 py-2 rounded-lg border border-gray-300" placeholder="https://example.com/file.pdf" required>
+            </div>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
+                <i class="fas fa-plus-circle mr-2"></i> Add PDF
+            </button>
+        </form>
+
+        <!-- PDF List -->
+        {% if resource.pdfs %}
+            <ul class="space-y-3">
+                {% for pdf in resource.pdfs %}
+                <li class="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                    <div class="mb-2">
+                        <span class="font-medium text-gray-800">{{ pdf.title }}</span>
+                        <p class="text-xs text-gray-500 break-all mt-1">{{ pdf.url }}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openEditPDFModal({{ pdf.id }}, '{{ pdf.title }}', '{{ pdf.url }}')"
+                                class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                            <i class="fas fa-pen mr-1"></i> Edit
+                        </button>
+                        <a href="{{ url_for('delete_pdf', id=pdf.id) }}" 
+                           onclick="return confirm('Delete this PDF?')"
+                           class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                            <i class="fas fa-trash mr-1"></i> Delete
+                        </a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-center text-gray-500 py-4"><i class="fas fa-file-pdf mr-2"></i>No PDFs yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Video Modal -->
+<div id="editVideoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Edit Video</h3>
+            <button onclick="closeModal('editVideoModal')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form id="editVideoForm" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm">Video Title</label>
+                <input type="text" name="title" id="editVideoTitle" class="w-full px-4 py-2 rounded-lg border border-gray-300" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm">YouTube URL / Embed</label>
+                <textarea name="url" id="editVideoUrl" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300" required></textarea>
+            </div>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition flex items-center">
+                <i class="fas fa-save mr-2"></i> Update Video
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit PDF Modal -->
+<div id="editPDFModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Edit PDF</h3>
+            <button onclick="closeModal('editPDFModal')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form id="editPDFForm" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm">PDF Title</label>
+                <input type="text" name="title" id="editPDFTitle" class="w-full px-4 py-2 rounded-lg border border-gray-300" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm">PDF URL</label>
+                <input type="url" name="url" id="editPDFUrl" class="w-full px-4 py-2 rounded-lg border border-gray-300" required>
+            </div>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition flex items-center">
+                <i class="fas fa-save mr-2"></i> Update PDF
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditVideoModal(id, title, url) {
+    document.getElementById('editVideoForm').action = '/admin/video/edit/' + id;
+    document.getElementById('editVideoTitle').value = title;
+    document.getElementById('editVideoUrl').value = url;
+    document.getElementById('editVideoModal').classList.remove('hidden');
+}
+
+function openEditPDFModal(id, title, url) {
+    document.getElementById('editPDFForm').action = '/admin/pdf/edit/' + id;
+    document.getElementById('editPDFTitle').value = title;
+    document.getElementById('editPDFUrl').value = url;
+    document.getElementById('editPDFModal').classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+window.onclick = function(event) {
+    if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black/50')) {
+        event.target.classList.add('hidden');
+    }
+}
+</script>
+{% endblock %}

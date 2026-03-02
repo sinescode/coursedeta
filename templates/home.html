@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Home - EduPortal{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="text-center py-8 sm:py-12">
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-2">Welcome to EduPortal</h1>
+    <p class="text-base sm:text-lg text-white/90 max-w-2xl mx-auto">Explore our comprehensive learning resources</p>
+</div>
+
+<!-- Subjects Grid -->
+{% if subjects %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
+        {% for subject in subjects %}
+        <div onclick="window.location.href='{{ url_for('subject_detail', subject_id=subject.id) }}'" 
+             class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer group overflow-hidden border border-white/20">
+            <div class="h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+            <div class="p-5 sm:p-6">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2 flex items-center">
+                    <i class="fas fa-book-open text-indigo-500 mr-2"></i>
+                    {{ subject.name }}
+                </h3>
+                <p class="text-gray-600 text-sm sm:text-base mb-4 line-clamp-2">
+                    {{ subject.description or 'No description available' }}
+                </p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-video mr-1 text-indigo-400"></i>
+                    <span>{{ subject.course_resources|length }} Course Resource(s)</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-10 text-center max-w-md mx-auto mt-10 shadow-xl">
+        <i class="fas fa-box-open text-5xl text-indigo-300 mb-4"></i>
+        <h2 class="text-2xl font-bold text-gray-700 mb-2">No Subjects Yet</h2>
+        <p class="text-gray-500">Check back later for new content!</p>
+    </div>
+{% endif %}
+{% endblock %}

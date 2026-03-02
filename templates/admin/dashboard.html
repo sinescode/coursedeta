@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - EduPortal{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl sm:text-3xl font-bold text-white mb-6 flex items-center">
+    <i class="fas fa-tachometer-alt mr-3"></i> Admin Dashboard
+</h1>
+
+<!-- Add Subject Card -->
+<div class="bg-white rounded-2xl shadow-xl p-5 sm:p-6 mb-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-plus-circle text-green-500 mr-2"></i> Add New Subject
+    </h2>
+    <form method="POST" action="{{ url_for('add_subject') }}">
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2 text-sm">Subject Name</label>
+            <input type="text" name="name" 
+                   class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400"
+                   placeholder="e.g., Mathematics" required>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2 text-sm">Description (optional)</label>
+            <textarea name="description" rows="2"
+                      class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400"
+                      placeholder="Brief description"></textarea>
+        </div>
+        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center">
+            <i class="fas fa-save mr-2"></i> Add Subject
+        </button>
+    </form>
+</div>
+
+<!-- Manage Subjects -->
+<div class="bg-white rounded-2xl shadow-xl p-5 sm:p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-edit text-indigo-500 mr-2"></i> Manage Subjects
+    </h2>
+    {% if subjects %}
+        <ul class="space-y-3">
+            {% for subject in subjects %}
+            <li class="bg-gray-50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-gray-200">
+                <div>
+                    <span class="font-semibold text-gray-800">{{ subject.name }}</span>
+                    <span class="text-sm text-gray-500 ml-2">({{ subject.course_resources|length }} resources)</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ url_for('admin_manage_resources', subject_id=subject.id) }}" 
+                       class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                        <i class="fas fa-folder-open mr-1"></i> Resources
+                    </a>
+                    <button onclick="openEditSubjectModal({{ subject.id }}, '{{ subject.name }}', '{{ subject.description or '' }}')"
+                            class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                        <i class="fas fa-pen mr-1"></i> Edit
+                    </button>
+                    <a href="{{ url_for('delete_subject', id=subject.id) }}" 
+                       onclick="return confirm('Delete this subject and all its resources?')"
+                       class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center">
+                        <i class="fas fa-trash mr-1"></i> Delete
+                    </a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-center text-gray-500 py-6"><i class="fas fa-box-open mr-2"></i>No subjects yet.</p>
+    {% endif %}
+</div>
+
+<!-- Edit Subject Modal (same structure, just styled with Tailwind) -->
+<div id="editSubjectModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Edit Subject</h3>
+            <button onclick="closeModal('editSubjectModal')" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form id="editSubjectForm" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm">Subject Name</label>
+                <input type="text" name="name" id="editSubjectName" class="w-full px-4 py-2 rounded-lg border border-gray-300" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2 text-sm">Description</label>
+                <textarea name="description" id="editSubjectDesc" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300"></textarea>
+            </div>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition flex items-center">
+                <i class="fas fa-save mr-2"></i> Update Subject
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditSubjectModal(id, name, description) {
+    document.getElementById('editSubjectForm').action = '/admin/subject/edit/' + id;
+    document.getElementById('editSubjectName').value = name;
+    document.getElementById('editSubjectDesc').value = description;
+    document.getElementById('editSubjectModal').classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+window.onclick = function(event) {
+    if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black/50')) {
+        event.target.classList.add('hidden');
+    }
+}
+</script>
+{% endblock %}
