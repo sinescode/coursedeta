@@ -322,6 +322,4 @@ def delete_pdf(id):
     flash('PDF deleted successfully!', 'success')
     return redirect(url_for('admin_manage_content', resource_id=resource_id))
 
-if __name__ == '__main__':
-    init_admin()
-    app.run(debug=True, port=5000)
+
